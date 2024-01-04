@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    container_name: auth-postgres
+    environment:
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    ports:
+      - "2345:5432"
