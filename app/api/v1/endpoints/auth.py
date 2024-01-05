@@ -14,3 +14,7 @@ async def signup(
         auth_response=Depends(auth_deps.signup)
 ):
     return create_response(data=auth_response)
+
+@router.post("/verify/email")
+async def verify_email():
+    ...

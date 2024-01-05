@@ -24,6 +24,9 @@ class AppSettings(BaseAppSettings):
     ACCESS_TOKEN_EXPIRES_IN: int
     JWT_ALGORITHM: str
 
+    RABBITMQ_URL: str
+    USER_CONFIRM_QUEUE_RECEIVE: str
+
     class Config:
         case_sensitive = True
         validate_assignment = True

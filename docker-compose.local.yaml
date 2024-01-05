@@ -12,14 +12,22 @@ services:
     ports:
       - "2345:5432"
 
-  sonarqube:
-    container_name: "sonarqube"
-    image: "sonarqube:9.9.1-community"
-    volumes:
-      - ./sonarqube/extensions:/opt/sonarqube/extensions
-      - ./sonarqube/logs:/opt/sonarqube/logs
-      - ./sonarqube/data:/opt/sonarqube/data
-    expose:
-      - "9000"
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    container_name: boxing-land-rabbit
     ports:
-      - "9000:9000"
+      - "1090:5672"
+      - "1089:15672"
+
+
+#  sonarqube:
+#    container_name: "sonarqube"
+#    image: "sonarqube:9.9.1-community"
+#    volumes:
+#      - ./sonarqube/extensions:/opt/sonarqube/extensions
+#      - ./sonarqube/logs:/opt/sonarqube/logs
+#      - ./sonarqube/data:/opt/sonarqube/data
+#    expose:
+#      - "9000"
+#    ports:
+#      - "9000:9000"
