@@ -1,5 +1,5 @@
 
-from pydantic import AnyHttpUrl, PostgresDsn
+from pydantic import AnyHttpUrl
 
 from app.core.settings.base import BaseAppSettings
 
@@ -17,7 +17,12 @@ class AppSettings(BaseAppSettings):
     DATABASE_NAME: str
 
     DB_POOL_SIZE: int = 90
-    SECRET_KEY: bytes
+
+    JWT_PUBLIC_KEY: str
+    JWT_PRIVATE_KEY: str
+    REFRESH_TOKEN_EXPIRES_IN: int
+    ACCESS_TOKEN_EXPIRES_IN: int
+    JWT_ALGORITHM: str
 
     class Config:
         case_sensitive = True
