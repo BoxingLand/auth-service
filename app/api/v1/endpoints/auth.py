@@ -11,6 +11,6 @@ REFRESH_TOKEN_EXPIRES_IN = settings.REFRESH_TOKEN_EXPIRES_IN
 
 @router.post("/signup")
 async def signup(
-        auth_response = Depends(auth_deps.signup)
+        auth_response=Depends(auth_deps.signup)
 ):
     return create_response(data=auth_response)

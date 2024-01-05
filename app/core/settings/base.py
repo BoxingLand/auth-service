@@ -2,6 +2,7 @@ from enum import Enum
 
 from pydantic_settings import BaseSettings
 
+
 class AppEnvTypes(Enum):
     prod: str = ".prod"
     dev: str = ".local"

@@ -6,5 +6,6 @@ async def signup(
 ):
     return signup_data
 
+
 async def user_exists(signup_data: SignupDto):
     ...
