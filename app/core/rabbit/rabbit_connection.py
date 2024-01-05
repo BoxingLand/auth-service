@@ -1,6 +1,7 @@
+import json
 from dataclasses import dataclass
 
-from aio_pika import connect_robust
+from aio_pika import connect_robust, Message
 from aio_pika.abc import AbstractIncomingMessage, AbstractRobustChannel, AbstractRobustConnection
 from loguru import logger
 
@@ -51,7 +52,7 @@ class RabbitConnection:
             logger.info('Successfully connected to the RabbitMQ!')
 
             await self.declare_queue()
-            await self.consume_queue()
+            # await self.consume_queue()
 
         except Exception as e:
             await self._clear()
@@ -95,6 +96,30 @@ class RabbitConnection:
         """
 
         await message.ack()
+
+    async def send_message(
+            self,
+            headers: dict,
+            message: dict,
+            routing_key: str
+    ) -> None:
+        if not self.channel:
+            raise RuntimeError('The message could not be sent because the connection with RabbitMQ is not established')
+
+        if not self.channel:
+            raise RuntimeError('The message could not be sent because the connection with RabbitMQ is not established')
+
+        async with self.channel.transaction():
+            message = Message(
+                headers=headers,
+                body=json.dumps(message).encode()
+            )
+
+            await self.channel.default_exchange.publish(
+                message,
+                routing_key=routing_key,
+            )
+        logger.info(f"Message sent to {routing_key}")
 
 
     async def disconnect(self) -> None:

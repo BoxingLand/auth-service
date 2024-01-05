@@ -12,7 +12,7 @@ class RabbitServerSettings(BaseSettings):
 class UserConfirmQueueReceive(RabbitServerSettings):
     queue: str = settings.USER_CONFIRM_QUEUE_RECEIVE
     auto_delete: bool = False
-    durable: bool = True
+    durable: bool = False
 
 
 class RabbitSettings:
@@ -20,7 +20,7 @@ class RabbitSettings:
     user_confirm = UserConfirmQueueReceive()
 
 
-@lru_cache
+
 def get_rmq_settings() -> RabbitSettings:
     return RabbitSettings()
 

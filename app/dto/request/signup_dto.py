@@ -7,7 +7,7 @@ class AccountType(str, Enum):
     BOXER = "boxer"
     COACH = "coach"
     JUDE = "judge"
-    SPAN_ENTITY = "SpanEntity"
+    ORGANIZER = "organizer"
 
 
 class SignupDto(BaseModel):
@@ -16,5 +16,5 @@ class SignupDto(BaseModel):
     email: EmailStr | None
     password: str
 
-    class Config:
-        hashed_password = None
+    # class Config:
+    #     hashed_password = None
