@@ -12,9 +12,10 @@ class AccountType(str, Enum):
 
 class SignupDto(BaseModel):
     account_type: AccountType
-    phone_number: str | None
-    email: EmailStr | None
+    phone_number: str | None = None
+    email: EmailStr | None = None
     password: str
+    password_confirm: str
 
     # class Config:
     #     hashed_password = None

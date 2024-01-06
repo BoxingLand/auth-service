@@ -24,8 +24,10 @@ class AppSettings(BaseAppSettings):
     ACCESS_TOKEN_EXPIRES_IN: int
     JWT_ALGORITHM: str
 
-    RABBITMQ_URL: str
-    USER_CONFIRM_QUEUE_RECEIVE: str
+    MAIL_FROM: str
+    MAIL_PASSWORD: str
+    MAIL_PORT: int
+    MAIL_SERVER: str
 
     class Config:
         case_sensitive = True

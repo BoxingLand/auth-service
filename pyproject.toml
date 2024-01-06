@@ -20,6 +20,7 @@ fastapi-jwt-auth = {extras = ["asymmetric"], version = "^0.5.0"}
 pydantic = {extras = ["email"], version = "^2.5.3"}
 aio-pika = "^9.3.1"
 loguru = "^0.7.2"
+fastapi-mail = "^1.4.1"
 
 
 [build-system]
