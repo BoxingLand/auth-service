@@ -6,8 +6,8 @@ from pydantic import BaseModel
 
 class User(BaseModel):
     id: UUID
-    email: str
-    password: str
+    email: str | None = None
+    password: str | None = None
     first_name: str | None = None
     last_name: str | None = None
     middle_name: str | None = None

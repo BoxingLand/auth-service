@@ -52,7 +52,6 @@ async def get_user_by_email(
                    WHERE email = '{email}';
                                """)
             user = await cur.fetchone()
-            logger.info(f"user: {user}")
             return user
 
 async def get_user_by_phone_number(
@@ -60,9 +59,11 @@ async def get_user_by_phone_number(
         request: Request
 ) -> User | None:
     async with request.app.async_pool.connection() as conn:
-        async with conn.cursor() as cur:
+        async with conn.cursor(row_factory=class_row(User)) as cur:
             await cur.execute(f"""
-                   SELECT * FROM "user" WHERE phone_number = '{phone_number}';
+                   SELECT * 
+                   FROM "user" 
+                   WHERE phone_number = '{phone_number}';
                                """)
             user = await cur.fetchone()
             return user
