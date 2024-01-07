@@ -10,7 +10,7 @@ class AccountType(str, Enum):
     ORGANIZER = "organizer"
 
 
-class SignupDto(BaseModel):
+class SignupRequestDto(BaseModel):
     account_type: AccountType
     phone_number: str | None = None
     email: EmailStr | None = None

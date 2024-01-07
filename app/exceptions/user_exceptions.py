@@ -87,3 +87,23 @@ class UserEmailNotFoundException(HTTPException):
             detail="The email not found.",
             headers=headers,
         )
+
+class UserPhoneNumberNotFoundException(HTTPException):
+    def __init__(
+            self,
+            phone_number: str | None = None,
+            headers: dict[str, Any] | None = None,
+    ) -> None:
+        if phone_number:
+            super().__init__(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"The phone number {phone_number} not found.",
+                headers=headers,
+            )
+            return
+
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The phone number not found.",
+            headers=headers,
+        )

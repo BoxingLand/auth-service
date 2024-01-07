@@ -1,0 +1,22 @@
+from datetime import date, datetime
+from uuid import UUID
+
+from pydantic import BaseModel
+
+
+class User(BaseModel):
+    id: UUID
+    email: str
+    password: str
+    first_name: str | None = None
+    last_name: str | None = None
+    middle_name: str | None = None
+    phone_number: str | None = None
+    birth_date: date | None = None
+    country: str | None = None
+    region: str | None = None
+    city: str | None = None
+    is_active: bool
+    updated_at: datetime
+    created_at: datetime
+    is_deleted: bool

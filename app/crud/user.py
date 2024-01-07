@@ -1,28 +1,33 @@
+import json
 from datetime import datetime
 from uuid import UUID, uuid4
 
+import psycopg
 from fastapi import Request
 from loguru import logger
+from psycopg.rows import class_row
 
-from app.dto.request.signup_dto import SignupDto
+from app.dto.models.user import User
+from app.dto.request.signup_dto import SignupRequestDto
 
 
 async def create_user(
-        signup_data: SignupDto,
+        signup_data: SignupRequestDto,
         request: Request
 ) -> UUID | None:
     try:
         async with request.app.async_pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(f"""
-                    INSERT INTO "user" (id, email, phone_number, password, is_active, updated_at, created_at)
+                    INSERT INTO "user" (id, email, phone_number, password, is_active, updated_at, created_at, is_deleted)
                     VALUES('{uuid4()}',
                            '{signup_data.email.lower()}',
                            '{signup_data.phone_number}',
                            '{signup_data.password}',
                            '{False}',
                            '{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}',
-                           '{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}'
+                           '{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}',
+                           '{False}'
                            )
                     RETURNING id;
                                 """)
@@ -38,11 +43,26 @@ async def create_user(
 async def get_user_by_email(
         email: str,
         request: Request
-):
+) -> User | None:
+    async with request.app.async_pool.connection() as conn:
+        async with conn.cursor(row_factory=class_row(User)) as cur:
+            await cur.execute(f"""
+                   SELECT *
+                   FROM "user" 
+                   WHERE email = '{email}';
+                               """)
+            user = await cur.fetchone()
+            logger.info(f"user: {user}")
+            return user
+
+async def get_user_by_phone_number(
+        phone_number: str,
+        request: Request
+) -> User | None:
     async with request.app.async_pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(f"""
-                   SELECT * FROM "user" WHERE email = '{email}';
+                   SELECT * FROM "user" WHERE phone_number = '{phone_number}';
                                """)
             user = await cur.fetchone()
             return user

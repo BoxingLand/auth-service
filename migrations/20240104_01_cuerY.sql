@@ -6,7 +6,6 @@ CREATE TABLE "user" (
     last_name VARCHAR(255),
     middle_name VARCHAR(255),
     phone_number VARCHAR(255) UNIQUE,
-    register_date timestamp,
     birthday DATE,
     country VARCHAR(255),
     region VARCHAR(255),
@@ -55,6 +54,13 @@ CREATE TABLE "organizer" (
     is_deleted BOOLEAN
 );
 
+CREATE TABLE "refresh_token" (
+    id UUID PRIMARY KEY,
+    user_id UUID,
+    refresh_token VARCHAR(255),
+    created_at timestamp
+);
+
 
 ALTER TABLE "boxer" ADD FOREIGN KEY (user_id) REFERENCES "user" (id);
 
@@ -63,4 +69,6 @@ ALTER TABLE "coach" ADD FOREIGN KEY (user_id) REFERENCES "user" (id);
 ALTER TABLE "judge" ADD FOREIGN KEY (user_id) REFERENCES "user" (id);
 
 ALTER TABLE "organizer" ADD FOREIGN KEY (user_id) REFERENCES "user" (id);
+
+ALTER TABLE "refresh_token" ADD FOREIGN KEY (user_id) REFERENCES "user" (id);
 
