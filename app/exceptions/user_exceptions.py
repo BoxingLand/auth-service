@@ -56,6 +56,8 @@ class UserPasswordNotMatchException(HTTPException):
             detail="Passwords do not match.",
             headers=headers,
         )
+
+
 class UserCreateException(HTTPException):
     def __init__(
             self,
@@ -88,6 +90,19 @@ class UserEmailNotFoundException(HTTPException):
             headers=headers,
         )
 
+
+class UserNotFoundException(HTTPException):
+    def __init__(
+            self,
+            headers: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The user not found.",
+            headers=headers,
+        )
+
+
 class UserPhoneNumberNotFoundException(HTTPException):
     def __init__(
             self,
@@ -105,5 +120,16 @@ class UserPhoneNumberNotFoundException(HTTPException):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="The phone number not found.",
+            headers=headers,
+        )
+
+class UserValidateException(HTTPException):
+    def __init__(
+            self,
+            headers: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Incorrect login details.",
             headers=headers,
         )

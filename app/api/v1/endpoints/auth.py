@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from app.core.config import settings
 from app.deps import auth_deps
-from app.utlis.response_schema import create_response
+from app.dto.models.token import Token
+from app.utlis.response_schema import IGetResponseBase, IPostResponseBase, create_response
 
 router = APIRouter()
 
@@ -30,23 +30,13 @@ async def _verify_email_new(
 
 @router.post("/signin")
 async def _signin(
-        signin_response=Depends(auth_deps.signin)   # noqa: B008
-):
+        signin_response=Depends(auth_deps.signin)  # noqa: B008
+) -> IPostResponseBase[Token]:
     return create_response(data=signin_response)
 
+
 @router.get("/refresh")
-async def _refresh():
-    ...
-
-@router.get("/change_password")
-async def _change_password(
-):
-    ...
-
-@router.put("/update")
-async def _update_data():
-    ...
-
-@router.delete("/delete")
-async def _delete_data():
-    ...
+async def _refresh(
+        refresh_response=Depends(auth_deps.update_refresh_token)  # noqa: B008
+) -> IGetResponseBase[Token]:
+    return create_response(data=refresh_response)

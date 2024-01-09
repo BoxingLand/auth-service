@@ -16,6 +16,3 @@ class SignupRequestDto(BaseModel):
     email: EmailStr | None = None
     password: str
     password_confirm: str
-
-    # class Config:
-    #     hashed_password = None

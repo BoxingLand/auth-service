@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from loguru import logger
+from prometheus_fastapi_instrumentator import Instrumentator
 from psycopg_pool import AsyncConnectionPool
 from starlette.middleware.cors import CORSMiddleware
 
@@ -37,3 +39,5 @@ if settings.CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+Instrumentator().instrument(app).expose(app)

@@ -1,32 +1,31 @@
 from typing import Annotated
 
 from fastapi import Query, Request
-from loguru import logger
 
 from app.core.security import security
-from app.core.security.security import encrypt_password, verify_password
+from app.core.security.security import TokenType, encrypt_password
 from app.crud.user import (
     create_user,
     get_verify_token_by_user_email,
     set_verify_token,
     user_email_exists,
     user_phone_number_exists,
-    verify_user, get_user_by_email, get_user_by_phone_number,
+    verify_user,
 )
 from app.dto.models.token import Token
-from app.dto.models.user import User
 from app.dto.request.signin_dto import SigninRequestDto
 from app.dto.request.signup_dto import SignupRequestDto
+from app.exceptions.token_exceptions import TokenIncorrectException
 from app.exceptions.user_exceptions import (
     UserCreateException,
     UserEmailExistException,
     UserEmailNotFoundException,
     UserPasswordNotMatchException,
-    UserPhoneNumberExistException, UserPhoneNumberNotFoundException,
+    UserPhoneNumberExistException,
 )
-from app.utlis.generate_verify_token import generate_verify_token
-from app.utlis.response_schema import create_response
-from app.utlis.send_verification_mail import send_verification_mail
+from app.utlis.authenticate import authenticate, create_jwt_tokens
+from app.utlis.verification.generate_verify_token import generate_verification_token
+from app.utlis.verification.send_verification_mail import send_verification_mail
 
 
 async def signup(
@@ -48,20 +47,17 @@ async def signup(
     if user_id is None:
         raise UserCreateException()
 
-    verification_token = generate_verify_token()
+    verification_token = generate_verification_token()
 
-    is_set_verify_token = await set_verify_token(
+    await set_verify_token(
         email=signup_data.email,
         verify_token=verification_token,
-        request=request
+        request=request,
     )
-
-    if is_set_verify_token is False:
-        raise UserEmailNotFoundException(email=signup_data.email)
 
     await send_verification_mail(
         email=signup_data.email,
-        verification_token=verification_token
+        verification_token=verification_token,
     )
     return user_id
 
@@ -69,44 +65,21 @@ async def signup(
 async def signin(
         signin_data: SigninRequestDto,
         request: Request,
-):
+) -> Token:
     user = await authenticate(signin_data=signin_data, request=request)
-    access_token = security.create_access_token(user.id)
-    refresh_token = security.create_refresh_token(user.id)
-    token_data = Token(
-        access_token=access_token,
-        token_type="bearer",
-        refresh_token=refresh_token,
-        user=user,
+
+    token_data = await create_jwt_tokens(
+        user_id=user.id,
+        request=request,
     )
 
     return token_data
 
 
-async def authenticate(
-        signin_data: SigninRequestDto,
-        request: Request,
-):
-    user: User
-    if signin_data.email is not None:
-        user = await get_user_by_email(email=signin_data.email, request=request)
-        if user is None:
-            raise UserEmailNotFoundException(email=signin_data.email)
-    elif signin_data.phone_number is not None:
-        user = await get_user_by_phone_number(phone_number=signin_data.phone_number, request=request)
-        if user is None:
-            raise UserPhoneNumberNotFoundException(phone_number=signin_data.phone_number)
-    else:
-        ...
-    if not verify_password(signin_data.password, user.password):
-        return None
-
-    return user
-
 async def verify_email(
         user_email: Annotated[str, Query(description="The str email of user")],
         verify_token: Annotated[str, Query(description="The str verify_token of user verify account")],
-        request: Request
+        request: Request,
 ):
     user_verify_token = await get_verify_token_by_user_email(user_email=user_email, request=request)
     if user_verify_token is not None and user_verify_token == verify_token:
@@ -117,17 +90,33 @@ async def verify_email_new(
         user_email: Annotated[str, Query(description="The str email of user")],
         request: Request
 ):
-    verification_token = generate_verify_token()
+    verification_token = generate_verification_token()
 
     is_set_verify_token = await set_verify_token(
         email=user_email,
         verify_token=verification_token,
-        request=request
+        request=request,
     )
     if is_set_verify_token is False:
         raise UserEmailNotFoundException(email=user_email)
 
     await send_verification_mail(
         email=user_email,
-        verification_token=verification_token
+        verification_token=verification_token,
     )
+
+
+async def update_refresh_token(
+        refresh_token: Annotated[str, Query(description="Update refresh token of user")],
+        request: Request
+):
+    refresh_token_decoded = security.decode_token(token=refresh_token)
+    if refresh_token_decoded["type"] != TokenType.refresh_token:
+        raise TokenIncorrectException()
+
+    token_data = await create_jwt_tokens(
+        user_id=refresh_token_decoded["sub"],
+        request=request,
+    )
+
+    return token_data

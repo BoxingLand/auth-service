@@ -21,6 +21,7 @@ pydantic = {extras = ["email"], version = "^2.5.3"}
 loguru = "^0.7.2"
 fastapi-mail = "^1.4.1"
 python-multipart = "^0.0.6"
+prometheus-fastapi-instrumentator = "^6.1.0"
 
 
 [build-system]
@@ -43,7 +44,8 @@ select = [
 ]
 
 
-#[tool.ruff.per-file-ignores]
+[tool.ruff.per-file-ignores]
+"app/crud/user.py" = ["W291"]
 
 
 [tool.pytest.ini_options]
