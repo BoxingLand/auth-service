@@ -19,6 +19,11 @@ async def _update_data():
     ...
 
 
+@router.post("/add_role")
+async def _add_role():
+    ...
+
+
 @router.delete("/delete")
 async def _delete_data(
         delete_user_response=Depends(profile_deps.delete_user)  # noqa: B008

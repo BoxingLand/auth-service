@@ -18,15 +18,15 @@ async def create_user(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     WITH user_data AS (
-                        INSERT INTO "user" (id, email, phone_number, password, is_active, updated_at, created_at, is_deleted)
+                        INSERT INTO "user" (id, email, phone_number, password, updated_at, created_at, is_active, is_deleted)
                         VALUES ('{uuid4()}',
                                 '{signup_data.email.lower()}',
                                 '{signup_data.phone_number}',
                                 '{signup_data.password}',
-                                False,
                                 now()::timestamp,
                                 now()::timestamp,
-                                False
+                                FALSE,
+                                FALSE
                         )
                         RETURNING id
                     )
@@ -35,7 +35,7 @@ async def create_user(
                             (SELECT id FROM user_data),
                             now()::timestamp,
                             now()::timestamp,
-                            False
+                            FALSE
                     );
                                 """)
                 await conn.commit()
@@ -99,9 +99,9 @@ async def user_email_exists(
     async with request.app.async_pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(f"""
-                SELECT email 
-                FROM "user" 
-                WHERE email = '{email}';
+                SELECT email
+                FROM "user"
+                WHERE email = '{email}' AND is_deleted = FALSE;
                             """)
             user_email = await cur.fetchone()
             if user_email is None:
@@ -118,7 +118,7 @@ async def user_phone_number_exists(
             await cur.execute(f"""
                 SELECT phone_number 
                 FROM "user" 
-                WHERE phone_number = '{phone_number}';
+                WHERE phone_number = '{phone_number}' AND is_deleted = FALSE;
                             """)
             user_phone_number = await cur.fetchone()
             if user_phone_number is None:
@@ -133,7 +133,7 @@ async def get_verify_token_by_user_email(
         async with conn.cursor() as cur:
             await cur.execute(f"""
                 SELECT verify_token 
-                FROM "user" 
+                FROM "user"
                 WHERE email = '{user_email}' AND is_deleted = FALSE;
                             """)
             user_verify_token = await cur.fetchone()
@@ -151,7 +151,7 @@ async def set_verify_token(
                 await cur.execute(f"""
                     UPDATE "user"
                     SET verify_token = '{verify_token}'
-                    WHERE email = '{email}' AND is_deleted = FALSE;
+                    WHERE email = '{email}' AND is_deleted = FALSE; 
                                 """)
                 await conn.commit()
 
@@ -170,7 +170,7 @@ async def verify_user(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     UPDATE "user"
-                    SET is_active = '{True}'
+                    SET is_active = True
                     WHERE email = '{user_email}' AND is_deleted = FALSE;
                                 """)
                 await conn.commit()
@@ -192,7 +192,7 @@ async def update_user_password(
                 await cur.execute(f"""
                     UPDATE "user"
                     SET password = '{new_password}'
-                    WHERE id = '{user_id}'AND is_deleted = FALSE;
+                    WHERE id = '{user_id}' AND is_deleted = FALSE;
                                 """)
                 await conn.commit()
 
@@ -212,7 +212,7 @@ async def delete_user(
                 await cur.execute(f"""
                     UPDATE "user"
                     SET is_deleted = TRUE
-                    WHERE id = '{user_id}'AND is_deleted = FALSE;
+                    WHERE id = '{user_id}';
                                 """)
                 await conn.commit()
 

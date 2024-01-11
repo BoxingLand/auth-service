@@ -10,10 +10,10 @@ CREATE TABLE "user" (
     country VARCHAR(255),
     region VARCHAR(255),
     city VARCHAR(255),
-    is_active BOOLEAN,
     verify_token VARCHAR(255),
     updated_at timestamp,
     created_at timestamp,
+    is_active BOOLEAN,
     is_deleted BOOLEAN
 );
 
@@ -34,6 +34,7 @@ CREATE TABLE "coach" (
     user_id UUID,
     updated_at timestamp,
     created_at timestamp,
+    is_active BOOLEAN,
     is_deleted BOOLEAN
 );
 
@@ -43,6 +44,7 @@ CREATE TABLE "judge" (
     judical_rank VARCHAR(255),
     updated_at timestamp,
     created_at timestamp,
+    is_active BOOLEAN,
     is_deleted BOOLEAN
 );
 
@@ -51,6 +53,7 @@ CREATE TABLE "organizer" (
     user_id UUID,
     updated_at timestamp,
     created_at timestamp,
+    is_active BOOLEAN,
     is_deleted BOOLEAN
 );
 

@@ -9,7 +9,7 @@ from app.crud.user import get_user_by_email, get_user_by_phone_number
 from app.dto.models.token import Token
 from app.dto.models.user import User
 from app.dto.request.signin_dto import SigninRequestDto
-from app.exceptions.user_exceptions import UserValidateException
+from app.exceptions.user_exceptions import UserValidateException, UserNotFoundException
 
 
 async def authenticate(
@@ -20,11 +20,11 @@ async def authenticate(
     if signin_data.email is not None:
         user = await get_user_by_email(email=signin_data.email, request=request)
         if user is None:
-            raise UserValidateException()
+            raise UserNotFoundException()
     elif signin_data.phone_number is not None:
         user = await get_user_by_phone_number(phone_number=signin_data.phone_number, request=request)
         if user is None:
-            raise UserValidateException()
+            raise UserNotFoundException()
     else:
         ...
 
@@ -36,11 +36,10 @@ async def authenticate(
 
 async def create_jwt_tokens(
         user_id: UUID,
-        acc_type: str,
         request: Request,
 ) -> Token:
-    access_token = security.create_access_token(subject=user_id, acc_type=acc_type)
-    refresh_token = security.create_refresh_token(user_id, acc_type=acc_type)
+    access_token = security.create_access_token(subject=user_id)
+    refresh_token = security.create_refresh_token(subject=user_id)
 
     token_data = Token(
         token_type="bearer",

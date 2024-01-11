@@ -35,7 +35,6 @@ async def signup(
     if signup_data.password != signup_data.password_confirm:
         raise UserPasswordNotMatchException()
 
-    # TODO реализовать регистрацию для разных типов аккаунтов на один user
     email_exists = await user_email_exists(email=signup_data.email, request=request)
     if email_exists == signup_data.email and signup_data.email is not None:
         raise UserEmailExistException(email=signup_data.email)
@@ -66,7 +65,6 @@ async def signin(
 
     token_data = await create_jwt_tokens(
         user_id=user.id,
-        acc_type=signin_data.account_type,
         request=request,
     )
 
@@ -111,7 +109,6 @@ async def update_refresh_token(
 
     token_data = await create_jwt_tokens(
         user_id=refresh_token_decoded["sub"],
-        acc_type=refresh_token_decoded["acc_type"],
         request=request,
     )
 
