@@ -4,7 +4,7 @@ from fastapi import Request
 
 from app.core.security import security
 from app.core.security.security import verify_password
-from app.crud.refresh_token import set_refresh_token, delete_all_refresh_tokens
+from app.crud.refresh_token import delete_all_refresh_tokens, set_refresh_token
 from app.crud.user import get_user_by_email, get_user_by_phone_number
 from app.dto.models.token import Token
 from app.dto.models.user import User
@@ -32,6 +32,7 @@ async def authenticate(
         raise UserValidateException()
 
     return user
+
 
 async def create_jwt_tokens(
         user_id: UUID,
