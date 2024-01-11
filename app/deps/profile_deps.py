@@ -48,6 +48,17 @@ async def change_password(
     return token_data
 
 
+async def update_user(
+        access_token: Annotated[str, Query(description="Uptade user")],
+        request: Request
+) -> str:
+    access_token_decoded = security.decode_token(token=access_token)
+    if access_token_decoded["type"] != TokenType.access_token:
+        raise TokenIncorrectException()
+    
+    return "User updated"
+
+
 async def delete_user(
         access_token: Annotated[str, Query(description="Delete user")],
         request: Request
