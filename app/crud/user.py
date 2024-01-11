@@ -1,4 +1,3 @@
-from datetime import datetime
 from uuid import UUID, uuid4
 
 from fastapi import Request
@@ -7,7 +6,7 @@ from psycopg.rows import class_row
 
 from app.dto.models.user import User
 from app.dto.request.signup_dto import SignupRequestDto
-from app.exceptions.user_exceptions import UserEmailNotFoundException
+from app.exceptions.user_exceptions import UserCreateException, UserEmailNotFoundException
 
 
 async def create_user(
@@ -18,27 +17,34 @@ async def create_user(
         async with request.app.async_pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(f"""
-                    INSERT INTO "user" (
-                        id, email, phone_number, password, is_active, updated_at, created_at, is_deleted
+                    WITH user_data AS (
+                        INSERT INTO "user" (id, email, phone_number, password, is_active, updated_at, created_at, is_deleted)
+                        VALUES ('{uuid4()}',
+                                '{signup_data.email.lower()}',
+                                '{signup_data.phone_number}',
+                                '{signup_data.password}',
+                                False,
+                                now()::timestamp,
+                                now()::timestamp,
+                                False
+                        )
+                        RETURNING id
                     )
+                    INSERT INTO "{signup_data.account_type.value}" (id, user_id, updated_at, created_at, is_deleted)
                     VALUES('{uuid4()}',
-                           '{signup_data.email.lower()}',
-                           '{signup_data.phone_number}',
-                           '{signup_data.password}',
-                           '{False}',
-                           '{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}',
-                           '{datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}',
-                           '{False}'
-                           )
-                    RETURNING id;
+                            (SELECT id FROM user_data),
+                            now()::timestamp,
+                            now()::timestamp,
+                            False
+                    );
                                 """)
                 await conn.commit()
-                inserted_id = await cur.fetchone()
-                return inserted_id[0]
+                # inserted_id = await cur.fetchone()
+                # return inserted_id[0]
     except Exception as e:
         logger.error(e)
         await conn.rollback()
-        return None
+        raise UserCreateException()  # noqa: B904
 
 
 async def get_user_by_id(
@@ -89,7 +95,7 @@ async def get_user_by_phone_number(
 async def user_email_exists(
         email: str,
         request: Request
-) -> bool:
+) -> str | None:
     async with request.app.async_pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(f"""
@@ -98,13 +104,15 @@ async def user_email_exists(
                 WHERE email = '{email}';
                             """)
             user_email = await cur.fetchone()
-            return True if user_email is not None else False
+            if user_email is None:
+                return None
+            return user_email[0]
 
 
 async def user_phone_number_exists(
         phone_number: str,
         request: Request
-) -> bool:
+) -> str | None:
     async with request.app.async_pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(f"""
@@ -113,7 +121,9 @@ async def user_phone_number_exists(
                 WHERE phone_number = '{phone_number}';
                             """)
             user_phone_number = await cur.fetchone()
-            return True if user_phone_number is not None else False
+            if user_phone_number is None:
+                return None
+            return user_phone_number[0]
 
 
 async def get_verify_token_by_user_email(
@@ -191,9 +201,10 @@ async def update_user_password(
         logger.error(e)
         await conn.rollback()
 
+
 async def delete_user(
-    user_id: UUID,
-    request: Request,
+        user_id: UUID,
+        request: Request,
 ):
     try:
         async with request.app.async_pool.connection() as conn:

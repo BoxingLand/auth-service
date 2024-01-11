@@ -5,7 +5,7 @@ CREATE TABLE "user" (
     first_name VARCHAR(255),
     last_name VARCHAR(255),
     middle_name VARCHAR(255),
-    phone_number VARCHAR(255) UNIQUE, 
+    phone_number VARCHAR(255),
     birthday DATE,
     country VARCHAR(255),
     region VARCHAR(255),

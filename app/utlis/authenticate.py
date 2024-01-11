@@ -35,14 +35,15 @@ async def authenticate(
 
 async def create_jwt_tokens(
         user_id: UUID,
+        acc_type: str,
         request: Request,
 ) -> Token:
-    access_token = security.create_access_token(user_id)
-    refresh_token = security.create_refresh_token(user_id)
+    access_token = security.create_access_token(subject=user_id, acc_type=acc_type)
+    refresh_token = security.create_refresh_token(user_id, acc_type=acc_type)
 
     token_data = Token(
-        access_token=access_token,
         token_type="bearer",
+        access_token=access_token,
         refresh_token=refresh_token,
     )
     await delete_all_refresh_tokens(

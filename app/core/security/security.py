@@ -30,11 +30,11 @@ def verify_password(password: str, encrypted_password: str):
     return pwd_context.verify(password, encrypted_password)
 
 
-def create_access_token(subject: str | Any) -> str:
+def create_access_token(subject: str | Any, acc_type: str) -> str:
     expire = datetime.utcnow() + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
-    to_encode = {"exp": expire, "sub": str(subject), "type": TokenType.access_token}
+    to_encode = {"exp": expire, "sub": str(subject), "acc_type": acc_type, "type": TokenType.access_token}
 
     return jwt.encode(
         payload=to_encode,
@@ -43,11 +43,11 @@ def create_access_token(subject: str | Any) -> str:
     )
 
 
-def create_refresh_token(subject: str | Any) -> str:
+def create_refresh_token(subject: str | Any, acc_type: str) -> str:
     expire = datetime.utcnow() + timedelta(
         minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES
     )
-    to_encode = {"exp": expire, "sub": str(subject), "type": TokenType.refresh_token}
+    to_encode = {"exp": expire, "sub": str(subject), "acc_type": acc_type, "type": TokenType.refresh_token}
 
     return jwt.encode(
         payload=to_encode,

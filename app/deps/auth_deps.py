@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Query, Request
+from fastapi import BackgroundTasks, Query, Request
 
 from app.core.security import security
 from app.core.security.security import TokenType, encrypt_password
@@ -17,7 +17,6 @@ from app.dto.request.signin_dto import SigninRequestDto
 from app.dto.request.signup_dto import SignupRequestDto
 from app.exceptions.token_exceptions import TokenIncorrectException
 from app.exceptions.user_exceptions import (
-    UserCreateException,
     UserEmailExistException,
     UserEmailNotFoundException,
     UserPasswordNotMatchException,
@@ -31,21 +30,22 @@ from app.utlis.verification.send_verification_mail import send_verification_mail
 async def signup(
         signup_data: SignupRequestDto,
         request: Request,
+        background_tasks: BackgroundTasks,
 ):
     if signup_data.password != signup_data.password_confirm:
         raise UserPasswordNotMatchException()
 
-    if await user_email_exists(email=signup_data.email, request=request) is True:
+    # TODO реализовать регистрацию для разных типов аккаунтов на один user
+    email_exists = await user_email_exists(email=signup_data.email, request=request)
+    if email_exists == signup_data.email and signup_data.email is not None:
         raise UserEmailExistException(email=signup_data.email)
 
-    if await user_phone_number_exists(phone_number=signup_data.phone_number, request=request) is True:
+    phone_number_exists = await user_phone_number_exists(phone_number=signup_data.phone_number, request=request)
+    if phone_number_exists == signup_data.phone_number and signup_data.phone_number is not None:
         raise UserPhoneNumberExistException(phone_number=signup_data.phone_number)
 
     signup_data.password = encrypt_password(password=signup_data.password)
-    user_id = await create_user(signup_data=signup_data, request=request)
-
-    if user_id is None:
-        raise UserCreateException()
+    await create_user(signup_data=signup_data, request=request)
 
     verification_token = generate_verification_token()
 
@@ -54,22 +54,19 @@ async def signup(
         verify_token=verification_token,
         request=request,
     )
-
-    await send_verification_mail(
-        email=signup_data.email,
-        verification_token=verification_token,
-    )
-    return user_id
+    background_tasks.add_task(send_verification_mail, signup_data.email, verification_token)
+    return "Success"
 
 
 async def signin(
         signin_data: SigninRequestDto,
         request: Request,
 ) -> Token:
-    user = await authenticate(signin_data=signin_data, request=request)
+    user = await authenticate(signin_data=signin_data, request=request, )
 
     token_data = await create_jwt_tokens(
         user_id=user.id,
+        acc_type=signin_data.account_type,
         request=request,
     )
 
@@ -88,7 +85,8 @@ async def verify_email(
 
 async def verify_email_new(
         user_email: Annotated[str, Query(description="The str email of user")],
-        request: Request
+        request: Request,
+        background_tasks: BackgroundTasks,
 ):
     verification_token = generate_verification_token()
 
@@ -100,10 +98,7 @@ async def verify_email_new(
     if is_set_verify_token is False:
         raise UserEmailNotFoundException(email=user_email)
 
-    await send_verification_mail(
-        email=user_email,
-        verification_token=verification_token,
-    )
+    background_tasks.add_task(send_verification_mail, user_email, verification_token)
 
 
 async def update_refresh_token(
@@ -116,6 +111,7 @@ async def update_refresh_token(
 
     token_data = await create_jwt_tokens(
         user_id=refresh_token_decoded["sub"],
+        acc_type=refresh_token_decoded["acc_type"],
         request=request,
     )
 

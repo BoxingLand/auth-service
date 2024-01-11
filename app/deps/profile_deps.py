@@ -41,6 +41,7 @@ async def change_password(
 
     token_data = await create_jwt_tokens(
         user_id=user.id,
+        acc_type=access_token_decoded["acc_type"],
         request=request,
     )
 
