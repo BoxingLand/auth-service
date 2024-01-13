@@ -69,6 +69,7 @@ async def update_user(
 
     await update_user_by_id(
         user_id=user.id,
+        update_data=update_data,
         request=request
     )
 
