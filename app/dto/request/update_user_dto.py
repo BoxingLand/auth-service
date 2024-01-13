@@ -10,3 +10,4 @@ class UpdateUserDto(BaseModel):
     country: str 
     region: str 
     city: str 
+    access_token: str
