@@ -16,7 +16,7 @@ class User(BaseModel):
     country: str | None = None
     region: str | None = None
     city: str | None = None
-    is_active: bool
     updated_at: datetime
     created_at: datetime
+    is_active: bool
     is_deleted: bool

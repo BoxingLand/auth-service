@@ -22,7 +22,9 @@ async def _update_data(
 
 
 @router.post("/add_role")
-async def _add_role():
+async def _add_role(
+
+):
     ...
 
 
