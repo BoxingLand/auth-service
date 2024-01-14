@@ -6,6 +6,7 @@ from psycopg.rows import class_row
 
 from app.dto.models.user import User
 from app.dto.request.signup_dto import SignupRequestDto
+from app.dto.request.update_user_dto import UpdateUserDto
 from app.exceptions.user_exceptions import UserCreateException, UserEmailNotFoundException
 
 
@@ -175,7 +176,30 @@ async def verify_user(
                                 """)
                 await conn.commit()
 
+    except Exception as e:
+        logger.error(e)
+        await conn.rollback()
 
+
+async def update_user_by_id(
+        user_id: UUID,
+        update_data: UpdateUserDto,
+        request: Request
+) -> None:
+    try:
+        async with request.app.async_pool.connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(f"""
+                    UPDATE "user"
+                    SET first_name = {update_data.first_name},
+                    last_name = {update_data.last_name},
+                    middle_name = {update_data.middle_name},
+                    birth_date = {update_data.birth_date},
+                    country = {update_data.country},
+                    region = {update_data.region},
+                    city = {update_data.city}
+                    WHERE id = '{user_id}' AND is_deleted = FALSE;
+                                """)
     except Exception as e:
         logger.error(e)
         await conn.rollback()
@@ -196,7 +220,6 @@ async def update_user_password(
                                 """)
                 await conn.commit()
 
-
     except Exception as e:
         logger.error(e)
         await conn.rollback()
@@ -215,7 +238,6 @@ async def delete_user(
                     WHERE id = '{user_id}';
                                 """)
                 await conn.commit()
-
 
     except Exception as e:
         logger.error(e)
