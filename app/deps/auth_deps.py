@@ -38,7 +38,7 @@ async def signup(
         raise UserPasswordNotMatchException()
     
     password_check = await password_validation(signup_data.password)
-    if not len(password_check):
+    if len(password_check):
         raise UserPasswordIsEasyException(details=password_check)
 
     email_exists = await user_email_exists(email=signup_data.email, request=request)
