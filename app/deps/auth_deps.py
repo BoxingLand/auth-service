@@ -21,10 +21,12 @@ from app.exceptions.user_exceptions import (
     UserEmailNotFoundException,
     UserPasswordNotMatchException,
     UserPhoneNumberExistException,
+    UserPasswordIsEasyException
 )
 from app.utlis.authenticate import authenticate, create_jwt_tokens
 from app.utlis.verification.generate_verify_token import generate_verification_token
 from app.utlis.verification.send_verification_mail import send_verification_mail
+from app.utlis.password_validation import password_validation
 
 
 async def signup(
@@ -34,6 +36,10 @@ async def signup(
 ):
     if signup_data.password != signup_data.password_confirm:
         raise UserPasswordNotMatchException()
+    
+    password_check = await password_validation(signup_data.password)
+    if not len(password_check):
+        raise UserPasswordIsEasyException(details=password_check)
 
     email_exists = await user_email_exists(email=signup_data.email, request=request)
     if email_exists == signup_data.email and signup_data.email is not None:
