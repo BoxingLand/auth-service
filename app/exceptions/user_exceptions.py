@@ -58,6 +58,20 @@ class UserPasswordNotMatchException(HTTPException):
         )
 
 
+class UserPasswordIsEasyException(HTTPException):
+    def __init__(
+                self,
+                details: list[str] | None = None,
+                headers: dict[str, Any] | None = None,
+        ) -> None:
+
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=details,
+            headers=headers,
+        )
+
+
 class UserCreateException(HTTPException):
     def __init__(
             self,
