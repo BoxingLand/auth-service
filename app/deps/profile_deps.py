@@ -5,11 +5,11 @@ from fastapi import Query, Request
 from app.core.security import security
 from app.core.security.security import TokenType, encrypt_password, verify_password
 from app.crud import user
-from app.crud.user import get_user_by_id, update_user_password, update_user_by_id, add_role_to_user
-from app.dto.request.profile import ChangePasswordDto, AddRoleDto, UpdateUserDto
-
+from app.crud.user import add_role_to_user, get_user_by_id, is_user_role_exist, update_user_by_id, update_user_password
+from app.dto.request.profile import AddRoleDto, ChangePasswordDto, UpdateUserDto
 from app.exceptions.token_exceptions import TokenIncorrectException
-from app.exceptions.user_exceptions import UserNotFoundException, UserPasswordNotMatchException, UserValidateException
+from app.exceptions.user_exceptions import UserNotFoundException, UserPasswordNotMatchException, UserValidateException, \
+    UserRoleExist
 from app.utlis.authenticate import create_jwt_tokens
 
 
@@ -49,14 +49,19 @@ async def change_password(
 
     return token_data
 
+
 async def add_role(
-    add_role_data: AddRoleDto,
-    request: Request
+        add_role_data: AddRoleDto,
+        request: Request
 ):
     access_token_decoded = security.decode_token(token=add_role_data.access_token)
     if access_token_decoded["type"] != TokenType.access_token:
         raise TokenIncorrectException()
 
+    if await is_user_role_exist(user_id=access_token_decoded["sub"],
+                                role=add_role_data.account_type.value,
+                                request=request) is not None:
+        raise UserRoleExist(role=add_role_data.account_type.value)
 
     await add_role_to_user(
         user_id=access_token_decoded["sub"],
@@ -65,6 +70,7 @@ async def add_role(
     )
 
     return "Role added successfully"
+
 
 async def update_user(
         update_data: UpdateUserDto,

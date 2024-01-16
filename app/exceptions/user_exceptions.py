@@ -133,3 +133,23 @@ class UserValidateException(HTTPException):
             detail="Incorrect login details.",
             headers=headers,
         )
+
+class UserRoleExist(HTTPException):
+    def __init__(
+            self,
+            role: str | None = None,
+            headers: dict[str, Any] | None = None,
+    ) -> None:
+        if role:
+            super().__init__(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"The user have role {role}.",
+                headers=headers,
+            )
+            return
+
+        super().__init__(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="The user have role.",
+            headers=headers,
+        )

@@ -6,7 +6,6 @@ from psycopg.rows import class_row
 
 from app.dto.models.user import User
 from app.dto.request.auth import SignupRequestDto
-
 from app.dto.request.profile import AddRoleDto, UpdateUserDto
 from app.exceptions.user_exceptions import UserCreateException, UserEmailNotFoundException
 
@@ -184,7 +183,6 @@ async def verify_user(
         await conn.rollback()
 
 
-
 async def update_user_by_id(
         user_id: UUID,
         update_data: UpdateUserDto,
@@ -252,10 +250,26 @@ async def update_user_password(
         logger.error(e)
         await conn.rollback()
 
+async def is_user_role_exist(
+        user_id: str,
+        role: str,
+        request: Request):
+    async with request.app.async_pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(f"""
+                SELECT id 
+                FROM "{role}"
+                WHERE user_id = '{user_id}' AND is_deleted = FALSE;
+                            """)
+            data = await cur.fetchone()
+            if data is None:
+                return None
+            return data[0]
+
 async def add_role_to_user(
-    user_id: UUID,
-    role_data: AddRoleDto,
-    request: Request,
+        user_id: UUID,
+        role_data: AddRoleDto,
+        request: Request,
 ):
     try:
         async with request.app.async_pool.connection() as conn:
