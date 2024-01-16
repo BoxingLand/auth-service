@@ -8,7 +8,7 @@ from app.crud.refresh_token import delete_all_refresh_tokens, set_refresh_token
 from app.crud.user import get_user_by_email, get_user_by_phone_number
 from app.dto.models.token import Token
 from app.dto.models.user import User
-from app.dto.request.signin_dto import SigninRequestDto
+from app.dto.request.auth import SigninRequestDto
 from app.exceptions.user_exceptions import UserValidateException, UserNotFoundException
 
 

@@ -5,8 +5,9 @@ from loguru import logger
 from psycopg.rows import class_row
 
 from app.dto.models.user import User
-from app.dto.request.signup_dto import SignupRequestDto
-from app.dto.request.update_user_dto import UpdateUserDto
+from app.dto.request.auth import SignupRequestDto
+
+from app.dto.request.profile import AddRoleDto, UpdateUserDto
 from app.exceptions.user_exceptions import UserCreateException, UserEmailNotFoundException
 
 
@@ -151,7 +152,8 @@ async def set_verify_token(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     UPDATE "user"
-                    SET verify_token = '{verify_token}'
+                    SET verify_token = '{verify_token}',
+                    updated_at = now()::timestamp
                     WHERE email = '{email}' AND is_deleted = FALSE; 
                                 """)
                 await conn.commit()
@@ -171,7 +173,8 @@ async def verify_user(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     UPDATE "user"
-                    SET is_active = True
+                    SET is_active = True,
+                    updated_at = now()::timestamp
                     WHERE email = '{user_email}' AND is_deleted = FALSE;
                                 """)
                 await conn.commit()
@@ -191,15 +194,17 @@ async def update_user_by_id(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     UPDATE "user"
-                    SET first_name = {update_data.first_name},
-                    last_name = {update_data.last_name},
-                    middle_name = {update_data.middle_name},
-                    birth_date = {update_data.birth_date},
-                    country = {update_data.country},
-                    region = {update_data.region},
-                    city = {update_data.city}
+                    SET first_name = CASE WHEN '{update_data.first_name}' is NOT NULL THEN '{update_data.first_name}' ELSE first_name END,
+                    last_name = '{update_data.last_name}',
+                    middle_name = '{update_data.middle_name}',
+                    birthday = '{update_data.birth_date}',
+                    country = '{update_data.country}',
+                    region = '{update_data.region}',
+                    city = '{update_data.city}',
+                    updated_at = now()::timestamp
                     WHERE id = '{user_id}' AND is_deleted = FALSE;
                                 """)
+            await conn.commit()
     except Exception as e:
         logger.error(e)
         await conn.rollback()
@@ -215,8 +220,32 @@ async def update_user_password(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     UPDATE "user"
-                    SET password = '{new_password}'
+                    SET password = '{new_password}',
+                    updated_at = now()::timestamp
                     WHERE id = '{user_id}' AND is_deleted = FALSE;
+                                """)
+                await conn.commit()
+
+    except Exception as e:
+        logger.error(e)
+        await conn.rollback()
+
+async def add_role_to_user(
+    user_id: UUID,
+    role_data: AddRoleDto,
+    request: Request,
+):
+    try:
+        async with request.app.async_pool.connection() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(f"""
+                    INSERT INTO "{role_data.account_type.value}" (id, user_id, updated_at, created_at, is_deleted)
+                    VALUES('{uuid4()}',
+                            '{user_id}',
+                            now()::timestamp,
+                            now()::timestamp,
+                            FALSE
+                    );          
                                 """)
                 await conn.commit()
 
@@ -234,7 +263,8 @@ async def delete_user(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     UPDATE "user"
-                    SET is_deleted = TRUE
+                    SET is_deleted = TRUE,
+                    updated_at = now()::timestamp
                     WHERE id = '{user_id}';
                                 """)
                 await conn.commit()

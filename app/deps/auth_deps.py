@@ -13,8 +13,7 @@ from app.crud.user import (
     verify_user,
 )
 from app.dto.models.token import Token
-from app.dto.request.signin_dto import SigninRequestDto
-from app.dto.request.signup_dto import SignupRequestDto
+from app.dto.request.auth import SignupRequestDto, SigninRequestDto
 from app.exceptions.token_exceptions import TokenIncorrectException
 from app.exceptions.user_exceptions import (
     UserEmailExistException,

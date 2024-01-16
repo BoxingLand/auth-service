@@ -2,7 +2,13 @@ from fastapi import APIRouter, Depends
 
 from app.deps import profile_deps
 from app.dto.models.token import Token
-from app.utlis.response_schema import IDeleteResponseBase, IGetResponseBase, IPutResponseBase, create_response
+from app.utlis.response_schema import (
+    IDeleteResponseBase,
+    IGetResponseBase,
+    IPostResponseBase,
+    IPutResponseBase,
+    create_response,
+)
 
 router = APIRouter()
 
@@ -16,16 +22,16 @@ async def _change_password(
 
 @router.put("/update")
 async def _update_data(
-    update_user_response=Depends(profile_deps.update_user)
+        update_user_response=Depends(profile_deps.update_user)  # noqa: B008
 ) -> IPutResponseBase[str]:
     return create_response(data=update_user_response)
 
 
 @router.post("/add_role")
 async def _add_role(
-
-):
-    ...
+        add_role_response=Depends(profile_deps.add_role)  # noqa: B008
+) -> IPostResponseBase[str]:
+    return create_response(data=add_role_response)
 
 
 @router.delete("/delete")
