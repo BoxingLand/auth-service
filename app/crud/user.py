@@ -184,6 +184,7 @@ async def verify_user(
         await conn.rollback()
 
 
+
 async def update_user_by_id(
         user_id: UUID,
         update_data: UpdateUserDto,
@@ -194,13 +195,34 @@ async def update_user_by_id(
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     UPDATE "user"
-                    SET first_name = CASE WHEN '{update_data.first_name}' is NOT NULL THEN '{update_data.first_name}' ELSE first_name END,
-                    last_name = '{update_data.last_name}',
-                    middle_name = '{update_data.middle_name}',
-                    birthday = '{update_data.birth_date}',
-                    country = '{update_data.country}',
-                    region = '{update_data.region}',
-                    city = '{update_data.city}',
+                    SET first_name = COALESCE(
+                        {f"'{update_data.first_name}'" if update_data.first_name is not None else 'NULL'}, 
+                        first_name
+                    ),
+                    last_name = COALESCE(
+                        {f"'{update_data.last_name}'" if update_data.last_name is not None else 'NULL'}, 
+                        last_name
+                    ),
+                    middle_name = COALESCE(
+                        {f"'{update_data.middle_name}'" if update_data.middle_name is not None else 'NULL'}, 
+                        middle_name
+                    ),
+                    birthday = COALESCE(
+                        {f"'{update_data.birthday}'" if update_data.birthday is not None else 'NULL'}, 
+                        birthday
+                    ),
+                    country = COALESCE(
+                        {f"'{update_data.country}'" if update_data.country is not None else 'NULL'}, 
+                        country
+                    ),
+                    region = COALESCE(
+                        {f"'{update_data.region}'" if update_data.region is not None else 'NULL'}, 
+                        region
+                    ),
+                    city = COALESCE(
+                        {f"'{update_data.city}'" if update_data.city is not None else 'NULL'}, 
+                        city
+                    ),
                     updated_at = now()::timestamp
                     WHERE id = '{user_id}' AND is_deleted = FALSE;
                                 """)

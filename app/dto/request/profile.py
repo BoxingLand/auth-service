@@ -21,8 +21,8 @@ class UpdateUserDto(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     middle_name: str | None = None
-    birth_date: date | None = None
+    birthday: date | None = None
     country: str | None = None
     region: str | None = None
     city: str | None = None
-    access_token: str | None = None
+    access_token: str
