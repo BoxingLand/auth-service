@@ -20,12 +20,14 @@ from app.exceptions.user_exceptions import (
     UserEmailNotFoundException,
     UserPasswordNotMatchException,
     UserPhoneNumberExistException,
-    UserPasswordIsEasyException
+    UserPasswordIsEasyException,
+    UserPhoneNumberIsWrong
 )
 from app.utlis.authenticate import authenticate, create_jwt_tokens
 from app.utlis.verification.generate_verify_token import generate_verification_token
 from app.utlis.verification.send_verification_mail import send_verification_mail
 from app.utlis.password_validation import password_validation
+from app.utlis.phone_number_validation import is_phone_number_correct
 
 
 async def signup(
@@ -43,6 +45,10 @@ async def signup(
     email_exists = await user_email_exists(email=signup_data.email, request=request)
     if email_exists == signup_data.email and signup_data.email is not None:
         raise UserEmailExistException(email=signup_data.email)
+    
+    if signup_data.phone_number is not None: # TODO: хз как у тебя работает проверка на наличие номера в методе user_phone_number_exists
+        if not is_phone_number_correct(phone_number=signup_data.phone_number):
+            raise UserPhoneNumberIsWrong()
 
     phone_number_exists = await user_phone_number_exists(phone_number=signup_data.phone_number, request=request)
     if phone_number_exists == signup_data.phone_number and signup_data.phone_number is not None:
