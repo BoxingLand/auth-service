@@ -1,17 +1,17 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from fastapi import Request
 from loguru import logger
+
+from app.database.connection import pool
 
 
 async def set_refresh_token(
         user_id: UUID,
-        refresh_token: str,
-        request: Request
+        refresh_token: str
 ) -> None:
     try:
-        async with request.app.async_pool.connection() as conn:
+        async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     INSERT INTO "refresh_token" (id, user_id, refresh_token, created_at)
@@ -26,12 +26,12 @@ async def set_refresh_token(
         logger.error(e)
         await conn.rollback()
 
+
 async def delete_all_refresh_tokens(
-        user_id: UUID,
-        request: Request
+        user_id: UUID
 ):
     try:
-        async with request.app.async_pool.connection() as conn:
+        async with pool.connection() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(f"""
                     DELETE FROM "refresh_token"

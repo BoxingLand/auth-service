@@ -1,52 +1,41 @@
 from typing import Any
 
-from fastapi import HTTPException
-from starlette import status
 
-
-class TokenExpiredSignatureException(HTTPException):
+class TokenExpiredSignatureException(Exception):
     def __init__(
             self,
             headers: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your token has expired. Please log in again.",
-            headers=headers,
-        )
+        super().__init__("Your token has expired. Please log in again.")
+        self.status_code = 403
+        self.headers = headers
 
 
-class TokenDecodeException(HTTPException):
+class TokenDecodeException(Exception):
     def __init__(
             self,
             headers: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Error when decoding the token. Please check your request.",
-            headers=headers,
-        )
+        super().__init__("Error when decoding the token. Please check your request.")
+        self.status_code = 403
+        self.headers = headers
 
 
-class TokenMissingRequiredClaimException(HTTPException):
+class TokenMissingRequiredClaimException(Exception):
     def __init__(
             self,
             headers: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="There is no required field in your token. Please contact the administrator.",
-            headers=headers,
-        )
+        super().__init__("There is no required field in your token. Please contact the administrator.")
+        self.status_code = 403
+        self.headers = headers
 
 
-class TokenIncorrectException(HTTPException):
+class TokenIncorrectException(Exception):
     def __init__(
             self,
             headers: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Incorrect token.",
-            headers=headers,
-        )
+        super().__init__("Incorrect token.")
+        self.status_code = 403
+        self.headers = headers

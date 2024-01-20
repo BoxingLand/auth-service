@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package auth;
+
+service Auth {
+
+  rpc VerifyEmail(VerifyEmailRequest) returns (VerifyEmailResponse) {}
+  rpc VerifyEmailNew(VerifyEmailNewRequest) returns (VerifyEmailNewResponse) {}
+  rpc Refresh(RefreshRequest) returns (RefreshResponse) {}
+  rpc Access(AccessRequest) returns (AccessResponse) {}
+  rpc CreateTokens(CreateTokensRequest) returns (CreateTokensResponse) {}
+}
+
+message VerifyEmailRequest {
+  string user_email = 1;
+  string verify_token = 2;
+}
+
+message VerifyEmailResponse {
+  string message = 1;
+}
+
+message VerifyEmailNewRequest {
+  string user_email = 1;
+}
+
+message VerifyEmailNewResponse {
+  string message = 1;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+message RefreshResponse {
+  string token_type = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+}
+
+message AccessRequest {
+  string access_token = 1;
+}
+
+message AccessResponse {
+  int32 exp = 1;
+  string sub = 2;
+  string type = 3;
+}
+
+message CreateTokensRequest {
+  string user_id = 1;
+}
+
+message CreateTokensResponse {
+  string token_type = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+}

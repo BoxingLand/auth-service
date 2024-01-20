@@ -6,7 +6,7 @@ from app.core.settings.app import AppSettings
 class DevAppSettings(AppSettings):
     debug: bool = True
 
-    title: str = "Dev Statistic app"
+    title: str = "Dev auth service"
 
     logging_level: int = logging.DEBUG
 
