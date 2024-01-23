@@ -4,6 +4,9 @@ from typing import Any
 from uuid import UUID
 
 import jwt
+from jwt import DecodeError, ExpiredSignatureError, MissingRequiredClaimError
+from passlib.context import CryptContext
+
 from app.core.config import settings
 from app.crud.refresh_token import delete_all_refresh_tokens, set_refresh_token
 from app.exceptions.token_exceptions import (
@@ -11,9 +14,6 @@ from app.exceptions.token_exceptions import (
     TokenExpiredSignatureException,
     TokenMissingRequiredClaimException,
 )
-from jwt import DecodeError, ExpiredSignatureError, MissingRequiredClaimError
-from passlib.context import CryptContext
-
 from app.models.token import Token
 
 
@@ -58,6 +58,7 @@ def create_refresh_token(subject: str | Any) -> str:
         algorithm=settings.JWT_ALGORITHM,
     )
 
+
 async def create_jwt_tokens(
         user_id: UUID,
 ) -> Token:
@@ -77,6 +78,7 @@ async def create_jwt_tokens(
     )
 
     return token_data
+
 
 def decode_token(token: str) -> dict[str, Any]:
     try:

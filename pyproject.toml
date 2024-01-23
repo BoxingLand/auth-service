@@ -8,20 +8,14 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.108.0"
 ruff = "^0.1.11"
-uvicorn = "^0.25.0"
 yoyo-migrations = "^8.2.0"
 psycopg = {extras = ["binary", "pool"], version = "^3.1.16"}
 pydantic-settings = "^2.1.0"
-fastapi-pagination = "^0.12.14"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-fastapi-jwt-auth = {extras = ["asymmetric"], version = "^0.5.0"}
 pydantic = {extras = ["email"], version = "^2.5.3"}
 loguru = "^0.7.2"
-fastapi-mail = "^1.4.1"
 python-multipart = "^0.0.6"
-prometheus-fastapi-instrumentator = "^6.1.0"
 grpcio = "^1.60.0"
 grpcio-tools = "^1.60.0"
 
