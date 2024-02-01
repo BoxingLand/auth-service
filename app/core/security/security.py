@@ -3,17 +3,14 @@ from enum import Enum
 from typing import Any
 from uuid import UUID
 
+import grpc
 import jwt
 from jwt import DecodeError, ExpiredSignatureError, MissingRequiredClaimError
 from passlib.context import CryptContext
 
 from app.core.config import settings
 from app.crud.refresh_token import delete_all_refresh_tokens, set_refresh_token
-from app.exceptions.token_exceptions import (
-    TokenDecodeException,
-    TokenExpiredSignatureException,
-    TokenMissingRequiredClaimException,
-)
+
 from app.models.token import Token
 
 
@@ -80,16 +77,19 @@ async def create_jwt_tokens(
     return token_data
 
 
-def decode_token(token: str) -> dict[str, Any]:
+async def decode_token(
+        token: str,
+        context: grpc.aio.ServicerContext,
+) -> dict[str, Any]:
     try:
         return jwt.decode(
             jwt=token,
             key=settings.ENCRYPT_KEY,
             algorithms=[settings.JWT_ALGORITHM],
         )
-    except ExpiredSignatureError as e:
-        raise TokenExpiredSignatureException() from e
-    except DecodeError as e:
-        raise TokenDecodeException() from e
-    except MissingRequiredClaimError as e:
-        raise TokenMissingRequiredClaimException() from e
+    except ExpiredSignatureError:
+        await context.abort(grpc.StatusCode.PERMISSION_DENIED, details="TokenExpiredSignature")
+    except DecodeError:
+        await context.abort(grpc.StatusCode.PERMISSION_DENIED, details="TokenDecode")
+    except MissingRequiredClaimError:
+        await context.abort(grpc.StatusCode.PERMISSION_DENIED, details="TokenMissingRequiredClaim")

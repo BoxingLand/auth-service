@@ -5,7 +5,7 @@ import grpc
 from app.auth import auth_pb2, auth_pb2_grpc
 from app.core.security import security
 from app.core.security.security import TokenType, create_jwt_tokens
-from app.exceptions.token_exceptions import TokenIncorrectException
+
 
 
 class Auth(auth_pb2_grpc.AuthServicer):
@@ -28,9 +28,9 @@ class Auth(auth_pb2_grpc.AuthServicer):
             request: auth_pb2.RefreshRequest,
             context: grpc.aio.ServicerContext,
     ) -> auth_pb2.RefreshResponse:
-        refresh_token_decoded = security.decode_token(token=request.refresh_token)
+        refresh_token_decoded = security.decode_token(token=request.refresh_token, context=context)
         if refresh_token_decoded["type"] != TokenType.refresh_token:
-            raise TokenIncorrectException()
+            await context.abort(grpc.StatusCode.PERMISSION_DENIED, details="TokenIncorrect")
 
         token_data = await create_jwt_tokens(
             user_id=refresh_token_decoded["sub"]
@@ -48,11 +48,12 @@ class Auth(auth_pb2_grpc.AuthServicer):
             context: grpc.aio.ServicerContext,
     ) -> auth_pb2.AccessResponse:
         access_token_decoded = security.decode_token(
-            token=request.access_token
+            token=request.access_token,
+            context=context
         )
 
         if access_token_decoded["type"] != TokenType.access_token:
-            raise TokenIncorrectException()
+            await context.abort(grpc.StatusCode.PERMISSION_DENIED, details="TokenIncorrect")
         return auth_pb2.AccessResponse(
             exp=access_token_decoded["exp"],
             sub=access_token_decoded["sub"],
@@ -68,7 +69,8 @@ class Auth(auth_pb2_grpc.AuthServicer):
             user_id=UUID(request.user_id)
         )
         access_token_decoded = security.decode_token(
-            token=token_data.access_token
+            token=token_data.access_token,
+            context=context
         )
 
         return auth_pb2.CreateTokensResponse(

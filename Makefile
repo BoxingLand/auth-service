@@ -4,7 +4,7 @@ include .env.local
 
 
 run:
-	uvicorn app.main:app --reload --port $(APP_PORT)
+	python -m app
 
 up-local:
 	docker compose -f docker-compose.local.yaml --env-file .env.local up -d
