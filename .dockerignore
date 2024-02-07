@@ -2,6 +2,7 @@
 .gitignore
 .gitattributes
 .ruff_cache
+.env.local
 
 # CI
 .codeclimate.yml

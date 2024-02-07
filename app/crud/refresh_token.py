@@ -1,9 +1,8 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from loguru import logger
-
 from app.database.connection import pool
+from loguru import logger
 
 
 async def set_refresh_token(

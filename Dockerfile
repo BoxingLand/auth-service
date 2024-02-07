@@ -1,10 +1,10 @@
 FROM python:3.11.4-alpine
 
-EXPOSE 8000
+EXPOSE 50052
 
 WORKDIR /app
 
-COPY ./pyproject.toml ./poetry.lock ./create_yoyo_ini.sh /migrations/ /app/
+COPY ./pyproject.toml ./poetry.lock /migrations/ /app/
 
 RUN pip install --upgrade pip
 RUN pip install poetry
@@ -15,3 +15,5 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 RUN apk add --no-cache bash
 
 COPY . ./
+
+CMD yoyo develop && python -m app

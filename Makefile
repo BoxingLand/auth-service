@@ -17,3 +17,9 @@ yoyo-init:
 
 ruff:
 	ruff check app
+
+build:
+	docker build -t emurashin/auth-service:latest .
+
+push:
+	docker push emurashin/auth-service:latest
