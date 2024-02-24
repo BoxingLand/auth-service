@@ -46,6 +46,7 @@ select = [
 
 [tool.ruff.per-file-ignores]
 "app/crud/user.py" = ["W291"]
+"app/auth/**" = ["UP004", "UP007", "E501", "I001", "E712", "UP009"]
 
 
 [tool.pytest.ini_options]

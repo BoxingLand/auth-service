@@ -3,13 +3,12 @@ import logging
 
 import grpc
 import prometheus_client
-from grpc_health.v1 import health, health_pb2, health_pb2_grpc
-from loguru import logger
-
 from app.auth import auth_pb2_grpc
 from app.auth.auth_server import Auth
 from app.core.config import settings
 from app.database.connection import open_pool
+from grpc_health.v1 import health, health_pb2, health_pb2_grpc
+from loguru import logger
 
 
 async def serve() -> None:

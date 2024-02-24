@@ -1,12 +1,10 @@
-
 import logging
 from timeit import default_timer
 from typing import Awaitable, Callable
-import grpc
 
+import grpc
 from prometheus_client.registry import REGISTRY
-from py_grpc_prometheus import grpc_utils
-from py_grpc_prometheus import server_metrics
+from py_grpc_prometheus import grpc_utils, server_metrics
 
 logger = logging.getLogger()
 
@@ -21,7 +19,6 @@ grpc_server_handled_total_counter = server_metrics.get_grpc_server_handled_count
     LEGACY,
     REGISTRY,
 )
-
 
 
 async def _wrap_async_iterator_inc_counter(iterator, counter, grpc_type, grpc_service_name, grpc_method_name):
